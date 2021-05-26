@@ -1,8 +1,6 @@
 # Dockerized ELK Stack with Elasticsearch, Kibana and Filebeat
 
-    This project is build to read a CSV file and a JSON file and send the data to Elasticsearch. Everything needed to run the project is present in this directory.
-
-    After initial setup, follow the last section, Customize filebeat to read your data, to integrate FB in your environment.
+This project is build to read a CSV file and a JSON file and send the data to Elasticsearch. Everything needed to run the project is present in this directory. After initial setup, follow the last section, Customize filebeat to read your data, to integrate FB in your environment.
 
 ## Pre-setup
 
