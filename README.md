@@ -34,12 +34,13 @@ This project is build to read a CSV file and a JSON file and send the data to El
 
 Currently, FB reads a sample file stored in data folder of this project. You can configure any directory on your machine to be used with FB. Steps are as follows:
 
-    1. Open docker-compose file and go to volumes section of filebeat service
-    2. Replace the following line with the source folder that you want to use with filebeat. Do Not change '/home/filebeat/data', only ./data needs to be updated
+
+1. Open docker-compose file and go to volumes section of filebeat service
+2. Replace the following line with the source folder that you want to use with filebeat. Do Not change '/home/filebeat/data', only ./data needs to be updated
         - ./data:/home/filebeat/data 
 
-    *   Go to inputs.d directory. Here you will find 2 yml files. CSV_Config.yml is configured to read a CSV file and json_config.yml is configured to read a json file
-    *   if your file is a json document like the test.json in data folder then update only the name of the file as highlighted below:
+3. Go to inputs.d directory. Here you will find 2 yml files. CSV_Config.yml is configured to read a CSV file and json_config.yml is configured to read a json file
+    * If your file is a json document like the test.json in data folder then update only the name of the file as highlighted below:
         paths:
          - /home/filebeat/data/{test.json --- update this much only}
 
