@@ -1,0 +1,87 @@
+version: '2.2'
+
+services:
+  es01:
+    container_name: es01
+    image: docker.elastic.co/elasticsearch/elasticsearch:$VERSION
+    environment:
+      - node.name=es01
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01
+      - ELASTIC_PASSWORD=$elastic
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.license.self_generated.type=trial
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=$CERTS_DIR/es01/es01.key
+      - xpack.security.http.ssl.certificate_authorities=$CERTS_DIR/ca/ca.crt
+      - xpack.security.http.ssl.certificate=$CERTS_DIR/es01/es01.crt
+
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.certificate_authorities=$CERTS_DIR/ca/ca.crt
+      - xpack.security.transport.ssl.certificate=$CERTS_DIR/es01/es01.crt
+      - xpack.security.transport.ssl.key=$CERTS_DIR/es01/es01.key
+    volumes: ['data01:/usr/share/elasticsearch/data', 'certs:$CERTS_DIR']
+    ports:
+      - 9200:9200
+    healthcheck:
+      test: curl --cacert $CERTS_DIR/ca/ca.crt -s https://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+
+  kibana:
+    user: kibana
+    image: docker.elastic.co/kibana/kibana:$VERSION
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - certs:$CERTS_DIR
+    environment: 
+      SERVERNAME: localhost
+      ELASTICSEARCH_URL: https://es01:9200
+      ELASTICSEARCH_HOSTS: https://es01:9200
+      ELASTICSEARCH_USERNAME: kibana
+      ELASTICSEARCH_PASSWORD: $kibana_system
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: $CERTS_DIR/ca/ca.crt
+      SERVER_SSL_ENABLED: "true"
+      SERVER_SSL_KEY: $CERTS_DIR/kibana/kibana.key
+      SERVER_SSL_CERTIFICATE: $CERTS_DIR/kibana/kibana.crt
+
+    ports:
+      - 5601:5601
+    depends_on: {"es01": {"condition": "service_healthy"}}
+
+  wait_until_ready:
+    image: docker.elastic.co/elasticsearch/elasticsearch:$VERSION
+    command: /usr/bin/true
+    depends_on: {"es01": {"condition": "service_healthy"}}
+
+
+  
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:$VERSION
+    user: root
+    container_name: fb01
+    depends_on: {"es01": {"condition": "service_healthy"}}
+    command: ["--strict.perms=false"]
+    volumes:
+      - certs:$CERTS_DIR
+
+      - ./data:/home/filebeat/data
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./inputs.d/:/usr/share/filebeat/inputs.d/
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    environment:
+      - KIBANA_HOST="https://kibana:5601"
+      - ES_HOSTS=https://es01:9200
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=${elastic}
+      - ES_CERTIFICATE_AUTHORITIES=/usr/share/elasticsearch/config/certificates/ca/ca.crt
+    
+        
+    
+volumes: {"data01", "certs"}
