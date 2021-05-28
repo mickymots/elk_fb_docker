@@ -32,28 +32,29 @@ This project is build to read a CSV file and a JSON file and send the data to El
 
 ## Cutomize Filebeat to read your data
 
-Currently, FB reads a sample file stored in data folder of this project. You can configure any directory on your machine to be used with FB. Steps are as follows:
+Currently, logstash reads a json file dropped in the data folder of this project and deletes the files after a successful read. You can configure any directory on your machine to be used with FB. Steps are as follows:
 
 
-1. Open docker-compose file and go to volumes section of filebeat service
-2. Replace the following line with the source folder that you want to use with filebeat. Do Not change '/home/filebeat/data', only ./data needs to be updated
-        - ./data:/home/filebeat/data 
+1. Open docker-compose file and go to volumes section of logstash service. You will find entries given below:
+    volumes:
+        - certs:$CERTS_DIR
+        - ./data:/home/logstash/data
+        - ./conf.d/:/etc/logstash/conf.d/
+        - ./logstash_config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+        - ./logstash_config/logstash.yml:/usr/share/logstash/config/logstash.yml
 
-3. Go to inputs.d directory. Here you will find 2 yml files. CSV_Config.yml is configured to read a CSV file and json_config.yml is configured to read a json file
-    * If your file is a json document like the test.json in data folder then update only the name of the file as highlighted below:
-        paths:
-         - /home/filebeat/data/{test.json --- update this much only}
 
-    * If your file is a CSV file like the test.csv in data folder then do the following:
-        *   update the name of the file 
-            paths:
-            - /home/filebeat/data/{test.csv --- update this much only}
+2. Replace the following line with the source folder that you want to use with logstash. Do Not change '/home/logasth/data', only ./data needs to be updated
+        - ./data:/home/logstash/data 
 
-        *   update the extract array processor: 
 
-            here mapping represents the columns of csv file. 
-            - extract_array:
-                field: decoded
-                mappings:
-                    name: 0
-                    age: 1
+## How to modify data pipeline
+Current config reads the files with .json extension and send the data to elastic. However, logstash can do much more than that. 
+
+If you want to enhance your data before sending it to elastic, then update the following file:
+    - Go to conf.d directory. Here you will find json.conf file. This is logstash data pipeline configuration file.
+    
+
+
+
+

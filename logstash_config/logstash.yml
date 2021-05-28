@@ -1,0 +1,8 @@
+config.debug: true
+config.reload.automatic: true
+config.reload.interval: 30s
+http.host: 0.0.0.0
+log.level: debug
+monitoring.elasticsearch.hosts:
+- https://es01:9200
+pipeline.separate_logs: true

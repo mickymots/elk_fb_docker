@@ -13,9 +13,9 @@ instances:
     ip:
       - 127.0.0.1
   
-  - name: filebeat
+  - name: logstash
     dns:
-      - filebeat
+      - logstash
       - localhost
     ip:
       - 127.0.0.1

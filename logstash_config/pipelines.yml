@@ -1,0 +1,6 @@
+
+- pipeline.id: json-pipeline
+  path.config: "/etc/logstash/conf.d/json.conf"
+  queue.type: persisted
+
+
